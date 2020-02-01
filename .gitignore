@@ -1,0 +1,11 @@
+/target/
+.git
+.idea
+.classpath
+.settings
+.vscode
+.classpath
+auto.iml
+*.log
+browser/
+webdriver/

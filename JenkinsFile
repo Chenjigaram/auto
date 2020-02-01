@@ -1,0 +1,68 @@
+
+
+ properties([
+  parameters([
+    string(name: 'FEATURE_TAG', defaultValue: '@test', description: 'feature file tags' ),
+    choice(name: 'ENVIRONMENT_RUN', choices: 'ST\nUT\nET\nPR', description: 'Environment to run' ,defaultValue: 'ST' )
+  ])
+])
+node('windows'){
+	String mvnHome = tool name: 'Maven 3.3.3', type: 'maven';
+    String jdkHome = tool name: 'SUN JDK 1.8', type: 'jdk';
+	String Result
+
+	try{
+    	env.JAVA_HOME="${jdkHome}"
+		env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"	
+		bat 'java -version'
+		echo "-Dcucumber.options=\"--tags ${params.FEATURE_TAG}\""
+		echo "${params.DOMAIN_TAG}"
+		echo "${params.ENVIRONMENT_RUN}"
+		echo "${env.M2_HOME}"
+		if(env.M2_HOME){
+		    mvnHome = env.M2_HOME;
+		}
+		echo mvnHome
+		stage('Project Checkout'){
+        		def git_branch='${BRANCH_NAME}'
+				jobStage='Project Checkout'
+				checkout scm
+				echo 'code checkout done'
+			}
+		stage('Selenium Cucumber') {	  
+
+			jobStage='Selenium Cucumber'
+			withEnv(["PATH+M2_HOME=${mvnHome}/bin"]){								
+				echo 'line K-1'		
+				try
+				{
+					echo 'line K-2'
+                    dir('../'){
+                    	bat "mvn  -X integration-test -DTEST_ENVIRONMENT=\"${params.ENVIRONMENT_RUN}\" verify -Dcucumber.options=\"--tags ${params.FEATURE_TAG}\""
+                    }
+					echo 'line K-3'
+					publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'selenium/target/generated-report/report/', reportFiles: '*.*', reportName: 'Selenium Report', reportTitles: ''])
+					echo 'line K-4'
+				}
+				catch(e)
+				{				 				
+					echo 'line K-5'
+                  	publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'selenium/target/generated-report/report/', reportFiles: '*.*', reportName: 'Selenium Report', reportTitles: ''])
+					throw e
+				}
+				echo 'line K-6'     
+		}
+	  }	
+		Result='Success'
+		}
+		
+	catch(e)	{      		
+				echo 'error'
+				Result='Failure'
+				throw e
+			}
+	
+	finally{
+		echo Result
+	}
+}
