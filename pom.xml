@@ -14,7 +14,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
-        <junit4.version>4.12</junit4.version>
+        <junit4.version>4.13.1</junit4.version>
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <cucumber.version>2.4.0</cucumber.version>
         <cluecumber-report-plugin.version>0.7.1</cluecumber-report-plugin.version>
